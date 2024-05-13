@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Gestión de Empleados</title>
+  <style>
+   
+  /* Estilo global para el cuerpo de la página */
+  body {
+    font-family: Arial, sans-serif;
+    padding: 20px;
+    background-color: #f5f5f5;  /* Color de fondo claro para suavidad */
+  }
+
+  /* Estilo para los títulos */
+  h1, h2 {
+    color: #333;  /* Texto oscuro para buen contraste */
+  }
+
+  /* Estilo para formularios */
+  form {
+    border: 1px solid #ccc;
+    padding: 10px;
+    background-color: #fff;  /* Fondo blanco para formularios */
+    margin-bottom: 20px;  /* Espacio entre formularios */
+  }
+
+  /* Estilo para botones */
+  button {
+    padding: 10px 20px;  /* Espaciado interior */
+    background-color: #28a745;  /* Color verde para llamar la atención */
+    color: #fff;  /* Texto blanco para contraste */
+    border: none;
+    border-radius: 5px;  /* Bordes redondeados */
+    cursor: pointer;
+  }
+
+  button:hover {
+    background-color: #218838;  /* Cambio de color al pasar el ratón */
+  }
+
+  /* Estilo para el área de empleados */
+  .empleado {
+    border: 1px solid #ccc;
+    padding: 15px;
+    margin: 10px;
+    background-color: #fff;  /* Fondo blanco para los empleados */
+  }
+
+  /* Estilo para entradas de texto */
+  input {
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    margin: 5px;
+  }
+
+  /* Estilo para el formulario de actualización */
+  #update-form {
+    display: none;  /* Oculto por defecto */
+    padding: 15px;
+    border: 1px solid #ccc;
+    background-color: #fff;
+    margin-top: 20px;
+  }
+
+
+  </style>
+  <script>
+
+    const ip = 'http://192.168.213.128:5000/empleados';
+    // Obtener y mostrar todos los empleados
+    function loadEmpleados() {
+      fetch(ip)  // Cambia según la IP del servidor Flask
+        .then(response => response.json())
+        .then(data => {
+          const empleadosDiv = document.getElementById("empleados");
+          empleadosDiv.innerHTML = "";  // Limpiar contenido anterior
+
+          data.forEach(empleado => {
+            empleadosDiv.innerHTML += `
+              <div class="empleado">
+                <p>ID: ${empleado[0]}</p>
+                <p>Nombre: ${empleado[1]}</p>
+                <p>Edad: ${empleado[2]}</p>
+                <p>Departamento: ${empleado[3]}</p>
+                <button onclick="deleteEmpleado(${empleado[0]})">Eliminar</button>
+                <button onclick="showUpdateForm(${empleado[0]}, '${empleado[1]}', ${empleado[2]}, '${empleado[3]}')">Actualizar</button>
+              </div>
+            `;
+          });
+        });
+    }
+
+    // Crear un nuevo empleado
+    function createEmpleado() {
+      const nombre = document.getElementById("nombre").value;
+      const edad = parseInt(document.getElementById("edad").value);
+      const departamento = document.getElementById("departamento").value;
+
+      fetch(ip, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ nombre, edad, departamento })
+      }).then(() => {
+        loadEmpleados();  // Actualizar la lista
+        clearForm();  // Limpiar el formulario
+      });
+    }
+
+    // Eliminar un empleado por ID
+    function deleteEmpleado(id) {
+      fetch(`${ip}/${id}`, {
+        method: 'DELETE'
+      }).then(() => {
+        loadEmpleados();  // Actualizar la lista
+      });
+    }
+
+    // Mostrar formulario de actualización
+    function showUpdateForm(id, nombre, edad, departamento) {
+      const updateForm = document.getElementById("update-form");
+      updateForm.style.display = "block";
+      document.getElementById("update-id").value = id;
+      document.getElementById("update-nombre").value = nombre;
+      document.getElementById("update-edad").value = edad;
+      document.getElementById("update-departamento").value = departamento;
+    }
+
+    // Actualizar un empleado por ID
+    function updateEmpleado() {
+      const id = parseInt(document.getElementById("update-id").value);
+      const nombre = document.getElementById("update-nombre").value;
+      const edad = parseInt(document.getElementById("update-edad").value);
+      const departamento = document.getElementById("update-departamento").value;
+
+      fetch(`${ip}/${id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ nombre, edad, departamento })
+      }).then(() => {
+        loadEmpleados();  // Actualizar la lista
+        document.getElementById("update-form").style.display = "none";  // Ocultar el formulario de actualización
+      });
+    }
+
+    // Limpiar el formulario de creación
+    function clearForm() {
+      document.getElementById("nombre").value = "";
+      document.getElementById("edad").value = "";
+      document.getElementById("departamento").value = "";
+    }
+  </script>
+</head>
+<body onload="loadEmpleados()">
+  <h1>Gestión de Empleados del otro equipo</h1>
+
+  <h2>Creaciones de empleadoss</h2>
+  <form>
+    <label for="nombre">Nombre:</label>
+    <input type="text" id="nombre"><br>
+    <label for="edad">Edad:</label>
+    <input type="number" id="edad"><br>
+    <label para="departamento">Departamento:</label>
+    <input type="text" id="departamento"><br>
+    <button type="button" onclick="createEmpleado()">Crear Empleado</button>
+  </form>
+
+  <h2>Lista de Empleados</h2>
+  <div id="empleados">
+    <!-- Se mostrarán los empleados -->
+  </div>
+
+  <!-- Formulario para actualizar empleados -->
+  <div id="update-form" style="display: none;">
+    <h2>Actualizar Empleado</h2>
+    <input type="hidden" id="update-id">
+    <label para="update-nombre">Nombre:</label>
+    <input type="text" id="update-nombre"><br>
+    <label para="update-edad">Edad:</label>''
+    <input type="number" id="update-edad"><br>
+    <label para="update-departamento">Departamento:</label>
+    <input type="text" id="update-departamento"><br>
+    <button type="button" onclick="updateEmpleado()">Actualizar Empleado</button>
+  </div>
+</body>
+</html>

@@ -1,0 +1,30 @@
+<!-- templates/index.html - Página HTML simple -->
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Página de Bienvenida</title>
+</head>
+<body>
+    <h1>Bienvenido a la Aplicación</h1>
+    <input type="text" id="name" placeholder="Introduce tu nombre">
+    <button onclick="greet()">Saludar</button>
+    <div id="response"></div>
+
+    <script>
+        // Función para saludar al usuario
+        function greet() {
+            var name = document.getElementById('name').value;
+            fetch('/api/greet', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ 'name': name })
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('response').innerText = data.message;
+            });
+        }
+    </script>
+</body>
+</html>
